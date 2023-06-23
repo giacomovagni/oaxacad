@@ -13,7 +13,7 @@ Install the package directly from **github** with
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 library(devtools)
-# install_github("giacomovagni/oaxacad")
+install_github("giacomovagni/oaxacad")
 ```
 
 ## Dependencies
