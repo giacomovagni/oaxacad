@@ -7,6 +7,8 @@
 #' dff = oaxaca_data()
 #' output = oaxaca(Y ~ X | group, data = dff$dataframe)
 #' Decomp_info_OB(output)
+#' @export
+
 
 #
 Decomp_info_OaxacaBlinder = function(results, full = F, SE = F){

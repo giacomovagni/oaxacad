@@ -6,6 +6,7 @@
 #' dff = oaxaca_data()
 #' output = oaxaca(Y ~ X | group, data = dff$dataframe)
 #' Decomp_Regression(output)
+#' @export
 
 #
 Decomp_Regression = function(oax_obj){
