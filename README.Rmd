@@ -48,6 +48,6 @@ output = oaxaca_data(interceptA_avr = 100, interceptB_avr = 100, betaA = 5, beta
 The function output a plot for the two groups
 
 ```{r}
-output
+output$fig
 ```
 
