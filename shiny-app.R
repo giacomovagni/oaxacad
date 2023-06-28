@@ -1,14 +1,15 @@
 
+library("devtools")
+install_github("giacomovagni/oaxacad")
 #
 library(magrittr)
-library(broom)
+library("broom")
 library(dplyr)
-library(ggplot2)
+library("ggplot2")
 library(ggthemes)
 library(gtools)
 library(oaxaca)
 library(oaxacad)
-
 library(shiny)
 #
 
@@ -26,8 +27,8 @@ ui <- fluidPage(
 
       helpText("Simulate Blinder-Oaxada Decomposition"),
 
-      sliderInput(inputId = "intercept1",label = "Intercept Group 0 (red)",min = 80,max = 150,value = 100),
-      sliderInput(inputId = "intercept2",label = "Intercept Group 1 (blue)",min = 80,max = 150,value = 100),
+      sliderInput(inputId = "intercept1",label = "Intercept Group 1 (red)",min = 80,max = 150,value = 100),
+      sliderInput(inputId = "intercept2",label = "Intercept Group 2 (blue)",min = 80,max = 150,value = 100),
 
       sliderInput(inputId = "beta1", label = "Beta Group 0",min = 0,max = 20, value = 10),
       sliderInput(inputId = "beta2", label = "Beta Group 1",min = 0,max = 20, value = 5),
@@ -54,8 +55,8 @@ ui <- fluidPage(
     mainPanel(
       plotOutput(outputId = "ggplot"),
 
-      p("Horizontal Line, show the average values of Y, i.e. the outcome, for Group 0 (red) and Group 1 (blue)"),
-      p("Vertical Line, show the average values of X (Observed Characteristics) for Group 0 (red) and Group 1 (blue)"),
+      p("Horizontal Line, show the average values of Y, i.e. the outcome, for Group 1 (red) and Group 2 (blue)"),
+      p("Vertical Line, show the average values of X (Observed Characteristics) for Group 1 (red) and Group 2 (blue)"),
 
       # Output: Histogram ----
       hr(),
@@ -77,23 +78,31 @@ ui <- fluidPage(
       hr(),
 
       h2("Threefold decomposition"),
-      p("X0 denotes the charcteristics of Group 0, and Beta 0 the regression coefficient for Group 0, etc."),
-      p("Note that you can vary the Beta 0, Beta 1, and X0, X1, with the sliders."),
+      p("X1 denotes the charcteristics of Group 1, and Beta 1 the regression coefficient for Group 1, etc."),
+      p("The endowment refers to the observed characteristics (X) and corresponds to the explained part. \n Explained = endowment / gap"),
+
+      hr(),
+
+      p("ΔXβ [endowment] = X1-X2 * Beta (of reference) ----
+        ΔβX [coef] =  β1-β2 * X (of reference) ----
+        ΔβΔX = interaction"),
+
+      p("Total gap = Σ (gap)[row 3]"),
+      p("Explained = ΔXβ [endowment][row 4]"),
 
       tableOutput("decomp2"),
 
-      p("The endowment refers to the observed characteristics (X) and corresponds to the explained part."),
-      p("The explained part is : (X1 - X0) B0"),
-      p("The unexplained part is : (B1 - B0) X0 and the interaction")
-
+      textOutput("text2"),
+      textOutput("text3")
     )
   )
 )
 
-
-# dd = oax  ()
-#dd = oaxaca_sim()
-#dd$decomp_reg
+#
+# dd = oaxaca_sim()
+# dd$decomp_simple$`% explained`
+# dd$decomp_twofold
+# dd$decomp_reg[]
 # dd$simulated_data$dataframe
 
 # interceptA_avr = input$intercept1
@@ -127,16 +136,20 @@ server <- function(input, output) {
 
   output$characteristics <- renderTable({
     ox()$simulated_data$dataframe %>%
+      mutate(group = factor(ifelse(group == 0, 1, 2))) %>%
       group_by(group) %>%
       summarise(n(), mean(X), mean(Y))
   })
 
   output$text = renderPrint({
-    cat("If people in Group 1 had the same measured characteristics as those in Group 0, we WOULD have observed", ox()$decomp_twofold$Decomposition[5], "(more or less) of Y")
+    cat("If people in Group 2 had the same measured characteristics as those in Group 1,
+        we WOULD have observed", ox()$decomp_twofold$Decomposition[5],
+        if( ox()$decomp_twofold$Decomposition[5] < 0) sign = "less" else sign = "more",
+        "of Y. \n The explained part of the gap is ", round(ox()$decomp_simple$`% explained`,2), "%")
   })
 
   output$decomp <- renderTable({
-    ox()$decomp_twofold
+    ox()$decomp_simple
   })
   #
 
@@ -144,6 +157,17 @@ server <- function(input, output) {
   output$decomp2 <- renderTable({
     ox()$decomp_reg
   })
+
+  output$text2 = renderPrint({
+    cat("Explained = ", ox()$decomp_reg$`ΔXβ [E]`[4] * 100 , "% ")
+    })
+
+  output$text3 = renderPrint({
+    cat("Note that the Unexplained part (", ox()$decomp_reg$`ΔβX [coef]`[3] + ox()$decomp_reg$`ΔβΔX`[3], ") is the sum of ΔβX [coef] (",
+        ox()$decomp_reg$`ΔβX [coef]`[3], ") plus the interaction ΔβΔX (", ox()$decomp_reg$`ΔβΔX`[3], ")")
+  })
+
+
 }
 
 #

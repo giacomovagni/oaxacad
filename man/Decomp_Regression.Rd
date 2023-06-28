@@ -16,7 +16,18 @@ A list
 Generate Simulated Data for Oaxaca Decomposition
 }
 \examples{
-dff = oaxaca_data()
-output = oaxaca(Y ~ X | group, data = dff$dataframe)
-Decomp_Regression(output)
+#' Only differences in characteristics (endowments)
+dff = oaxaca_data(interceptA_avr = 100, interceptB_avr = 100, betaA = 5, betaB = 5, xA_avr = 20, xB_avr = 5)
+oax_obj = oaxaca(Y ~ X | group, data = dff$dataframe)
+Decomp_Regression(oax_obj)
+
+Only differences in intercepts
+dff = oaxaca_data(interceptA_avr = 115, interceptB_avr = 100, betaA = 5, betaB = 5, xA_avr = 10, xB_avr = 10)
+oax_obj = oaxaca(Y ~ X | group, data = dff$dataframe)
+Decomp_Regression(oax_obj)
+
+Differences in intercepts and coefficients
+dff = oaxaca_data(interceptA_avr = 115, interceptB_avr = 100, betaA = 5, betaB = 5, xA_avr = 10, xB_avr = 10)
+oax_obj = oaxaca(Y ~ X | group, data = dff$dataframe)
+Decomp_Regression(oax_obj)
 }

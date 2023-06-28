@@ -51,8 +51,8 @@ oaxaca_data = function(interceptA_avr = 100,
   YA = interceptA + xA*betaA + errorA
   YB = interceptB + xB*betaB + errorB
   #
-  dA = data.frame(X = xA, Y = YA) %>% mutate(group = 0)
-  dB = data.frame(X = xB, Y = YB) %>% mutate(group = 1)
+  dA = data.frame(X = xA, Y = YA) %>% dplyr::mutate(group = 0)
+  dB = data.frame(X = xB, Y = YB) %>% dplyr::mutate(group = 1)
   #
   df = bind_rows(dA,dB)
   #
@@ -60,7 +60,9 @@ oaxaca_data = function(interceptA_avr = 100,
   #
   df$group = factor(df$group)
   #
-  fig = ggplot(data=df, aes(X, Y, colour = group, shape = group, linetype = group)) +
+
+  #
+  fig = ggplot(data=df, aes(X, Y, colour = group)) +
     geom_point() +
     geom_hline(yintercept = mean(YA), col = 'red', linetype = 2) +
     geom_hline(yintercept = mean(YB), col = 'blue4', linetype = 3) +
@@ -69,7 +71,7 @@ oaxaca_data = function(interceptA_avr = 100,
     geom_vline(xintercept = mean(xB), col = 'blue4', linetype = 3) +
 
     geom_smooth(method = "lm", se = F, fullrange=TRUE) +
-    scale_color_manual(values = c('red', 'blue4')) +
+    scale_color_manual(labels = c("Group 1", "Group 2"), values = c('red', 'blue4')) +
     theme_minimal()
   #
   return(list(dataframe = df, fig = fig))

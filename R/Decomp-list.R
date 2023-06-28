@@ -16,6 +16,7 @@
 Decomp = function(results, name = 'Decomposition', decomp = 'threefold'){
 
   message('Omega = 1')
+  message('Group 2 is reference')
 
   if(decomp == 'twofold'){
 
@@ -25,17 +26,17 @@ Decomp = function(results, name = 'Decomposition', decomp = 'threefold'){
     Unexplained = x[1, c( 'coef(unexplained)')] %>% round(3)
 
     #
-    TotalChange = results$y$y.diff %>% round(3)
-    GroupRef = results$y$y.A %>% round(3)
-    Group1 = results$y$y.B %>% round(3)
+    GAP = results$y$y.diff %>% round(3)
+    Group1 = results$y$y.A %>% round(3)
+    Group2 = results$y$y.B %>% round(3)
 
     . = ''
-    Periods = rbind(Group1, GroupRef)
+    Periods = rbind(Group2, Group1)
 
-    perc_explained = round(Compositional / TotalChange, 3) * 100
-    perc_unexplained = round(Unexplained / TotalChange, 3) * 100
+    `% explained` = round(Compositional / GAP, 3) * 100
+    `% unexplained` = round(Unexplained / GAP, 3) * 100
 
-    Decomp = rbind(GroupRef, Group1, TotalChange, ., Compositional, Unexplained, perc_explained, perc_unexplained)
+    Decomp = rbind(Group1, Group2, GAP, ., Compositional, Unexplained, `% explained`, `% unexplained`)
     Decomp
 
     colnames(Decomp) = 'Decomposition'
@@ -49,28 +50,27 @@ Decomp = function(results, name = 'Decomposition', decomp = 'threefold'){
     Compositional = x$x[x$var == 'coef(endowments)'] %>% round(4)
     Unexplained = x$x[x$var == 'coef(coefficients)']  %>% round(4)
     Interaction = x$x[x$var == 'coef(interaction)']   %>% round(4)
-    TotalChange = results$y$y.diff %>% round(4)
-    GroupRef = results$y$y.A %>% round(4)
-    Group1 = results$y$y.B %>% round(4)
+    GAP = results$y$y.diff %>% round(4)
+    Group1 = results$y$y.A %>% round(4)
+    Group2 = results$y$y.B %>% round(4)
 
     . = ''
-    Periods = rbind(Group1, GroupRef)
+    Periods = rbind(Group1, Group2)
 
-    Decomp = rbind(TotalChange, ., Compositional, Unexplained, Interaction);
+    Decomp = rbind(GAP, ., Compositional, Unexplained, Interaction);
 
     OaxDec = rbind(Periods, Decomp)
     colnames(OaxDec) = 'Decomposition'
-    # rownames(OaxDec) = c('Total Change', '-', 'Compositional', 'Behavioral', 'Interaction')
+
+    rownames(OaxDec) = c("Group 1 Y", "Group 2 Y", "GAP = Y1-Y2", "", "Compositional", 'Coefficient', "Interaction")
     OaxDec = as.data.frame(OaxDec)
 
     # interpretation
     #message('If people in Group 1, looked liked people in Group 0 regarding measured characteristics (compositional), they WOULD have spend ', Unexplained, ' more in total,
     #        yet the change in characteristics decreases by ', CompositionalChange, ' yielding an increase in total time of ', TotalChange)
 
-    # message('If people in Group 1, looked liked people in Group 0 regarding measured characteristics (compositional), they WOULD have spend ', Compositional, ' more time doing X,Y,Z')
-    #message('group differences in endowments (i.e., Xi)')
-    #message('group differences in coefficients (i.e., Betas, ex: return to education stronger for group 1)')
-    #message('% explained by endowments')
+    message("If people in Group 2 had the same measured characteristics as those in Group 1, we WOULD have observed ", Compositional,
+        if(Compositional) sign = " less " else sign = " more ", "of Y. \n The explained part of the gap is ", round(Compositional/GAP,2), "%")
 
     #
     CI_composition = as.data.frame( cbind(results$threefold$variables[,1] - results$threefold$variables[,2]*1.96, results$threefold$variables[,1] + results$threefold$variables[,2]*1.96) )
@@ -96,8 +96,8 @@ Decomp = function(results, name = 'Decomposition', decomp = 'threefold'){
     # p-value #
     brows$pvalue = round(pvalues_composition, 5)
     # colnames #
-    colnames(brows) = c('Composition_GroupRef', 'Composition_Group1', 'diff', 'conf.low', 'conf.high', 'pvalue')
-    brows = brows[, c('Composition_GroupRef', 'Composition_Group1', 'diff', 'pvalue')]
+    colnames(brows) = c('Composition_Group1', 'Composition_Group2', 'diff', 'conf.low', 'conf.high', 'pvalue')
+    brows = brows[, c('Composition_Group1', 'Composition_Group2', 'diff', 'pvalue')]
 
     # Coefficients #
     betas = cbind( round(results$beta[[1]], 3), round(results$beta[[2]], 3), round(results$beta[[3]],3) ) %>% as.data.frame()
@@ -108,13 +108,13 @@ Decomp = function(results, name = 'Decomposition', decomp = 'threefold'){
     # p-value #
     betas$pvalue = round(pvalues_unexplained, 5)
     # colnames #
-    colnames(betas) = c('Coeff_GroupRef', 'Coeff_Group1', 'diff', 'conf.low', 'conf.high', 'pvalue')
+    colnames(betas) = c('Coeff_Group1', 'Coeff_Group2', 'diff', 'conf.low', 'conf.high', 'pvalue')
     #
 
-    betas = betas[, c('Coeff_GroupRef', 'Coeff_Group1', 'diff', 'pvalue')]
+    betas = betas[, c('Coeff_Group1', 'Coeff_Group2', 'diff', 'pvalue')]
 
     # Raw differential (R)
-    R = TotalChange
+    R = GAP
 
     # Explained #
     E = Compositional # explained
