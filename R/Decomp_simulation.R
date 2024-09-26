@@ -64,3 +64,4 @@ oaxaca_sim = function(interceptA_avr = 100,
               decomp_simple = decomp_simple))
 }
 #
+

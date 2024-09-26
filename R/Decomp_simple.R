@@ -10,10 +10,13 @@
 #' @export
 
 #
-Decomp_simple = function(results){
+Decomp_simple = function(results, omega = 0){
 
+  #
+  overall_res = data.frame(results$twofold$overall)
+  overall_res = overall_res[overall_res$group.weight == omega, ]
   # Oaxaca # Omega = 0 #
-  rb = results$twofold$overall[1, ]
+  rb = overall_res
   #
 
   #
@@ -21,8 +24,8 @@ Decomp_simple = function(results){
   #
 
   #
-  tex = oaxaca$explained / oaxaca$se_ex
-  tunex =  oaxaca$unexplained / oaxaca$se_unex
+  tex = oaxaca$coef.explained. / oaxaca$se.explained.
+  tunex =  oaxaca$coef.unexplained. / oaxaca$se.unexplained.
 
   pvalue1 = pnorm( abs(tex), lower.tail = F)
   pvalue2 = pnorm( abs(tunex), lower.tail = F)
@@ -33,16 +36,16 @@ Decomp_simple = function(results){
   oaxaca$pvalue_unex = stars.pval(pvalue2)
   #
 
-  oaxaca$gap = oaxaca$explained + oaxaca$unexplained
-  oaxaca$perc_explained = (oaxaca$explained / oaxaca$gap)*100
+  oaxaca$gap = oaxaca$coef.explained. + oaxaca$coef.unexplained.
+  oaxaca$perc_explained = (oaxaca$coef.explained. / oaxaca$gap)*100
 
   # rearrange #
-  oxx = oaxaca[c(7,1,5,3,6,8)]
+  oxx = oaxaca[,c(7,1,5,3,6,8)]
   #
 
-  oxx$gap = round(oxx$gap, 4)
-  oxx$explained = round(oxx$explained, 4)
-  oxx$unexplained = round(oxx$unexplained, 4)
+  oxx$gap = round(oxx$gap, 5)
+  oxx$coef.explained. = round(oxx$coef.explained., 5)
+  oxx$coef.unexplained. = round(oxx$coef.unexplained., 5)
 
   #
   colnames(oxx) = c('gap', 'Explained', 'pvale', 'Unexplained', 'pvalu', '% explained')
